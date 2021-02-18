@@ -15,8 +15,9 @@ const postinfo = async (req,res,next) => {
 
 const getinfo = async (req,res,next) => {
     try{
-        console.log(datatemp);
-        res.status(200).json(datatemp);
+        let data = await userdata.find();
+        console.log(data);
+        res.status(200).json(data);
     }
     catch (err){
         next(err);
