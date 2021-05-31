@@ -1,5 +1,7 @@
 const datatemp = require('../models/temp');
 const userdata= require("../models/userdata");
+const vendorData= require("../models/vendorData");
+
 
 const postinfo = async (req,res,next) => {
     try {
@@ -23,7 +25,20 @@ const getinfo = async (req,res,next) => {
         next(err);
     }
 }
+
+const addVendor = async (req,res,next) => {
+    try {
+        await req.body.data.vendors.map(async vendor => {
+            let vendorD = new vendorData(vendor);
+            vendorD = await vendorD.save();
+        });
+        res.status(200).send('OK');
+    } catch (err) {
+        next(err);
+    }
+}
 module.exports = {
     getinfo,
     postinfo,
+    addVendor
 };

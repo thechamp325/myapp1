@@ -7,8 +7,8 @@ const cors = require('cors');
 
 const app = express();
 console.log(process.env.MONGODB_HOST_NAME);
-const MONGODB_URI = `mongodb://${process.env.MONGODB_HOST_NAME}:${process.env.MONGODB_PORT}/${process.env.MONGODB_NAME}`;
-// const MONGODB_URI = `mongodb://localhost:27017/myapp1db`;
+// const MONGODB_URI = `mongodb://${process.env.MONGODB_HOST_NAME}:${process.env.MONGODB_PORT}/${process.env.MONGODB_NAME}`;
+const MONGODB_URI = `mongodb://localhost:27017/myapp1db`;
 
 const PORT = Number(process.env.PORT) || 5000;
 
