@@ -1,14 +1,16 @@
-version: "2"
+version: "2.4"
+
 services:
   web:
     build: .
     ports:
-    - "5002:5000"
+      - "5002:5000"
     depends_on:
-    - mongo
+      - mongo
+
   mongo:
     image: mongo
     ports:
-    - "27017:27017"
+      - "27017:27017"
     volumes:
-    - D:/Ganu/Codes/nodeintern/data/:/data/db
+      - "D:/Ganu/Codes/nodeintern/data:/data/db"

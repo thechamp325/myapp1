@@ -78,6 +78,7 @@ const getpurchases = async (req,res,next) => {
         next(err);
     }
 }
+
 const getsales = async (req,res,next) => {
     try{
         let data = await salesData.find();

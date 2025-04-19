@@ -8,14 +8,26 @@ const vendorDataSchema =  new Schema({
     address:{
         type: String,
     },
-    trustscore:{
+    email:{
+        type:String
+    },
+    aadharid:{
+        type:String,
+    },
+    mobile:{
         type:Number
     },
-    id:{
-        type:Number,
+    City:{
+        type:String
     },
-    phone:{
-        type:Number
+    State:{
+        type:String,
+    },
+    Zip:{
+        type: String,
+    },
+    ProductGroups:{
+        type:[String]
     }
 });
 
