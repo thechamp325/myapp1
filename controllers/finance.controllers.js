@@ -9,6 +9,18 @@ const productData = require('../models/ProductData');
 const postBillSales = async (req,res,next) => {
     try {
         await req.body.data.uds.map(async ud => {
+            for (let ud of req.body.data.uds) {
+                const product = await productData.findOne({ productName: ud.productName });
+                if (!product || product.quantity < ud.quantity) {
+                    return res.status(400).json({
+                        message: `Insufficient quantity for ${ud.productName}`,
+                        product: ud.productName,
+                        available: product ? product.quantity : 0,
+                        requested: ud.quantity
+                    });
+                }
+            }
+            
             let newEntry = new salesData(ud);
             // let data = await purchasesData.findOne();
             newEntry = await newEntry.save();
