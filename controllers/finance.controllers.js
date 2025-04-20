@@ -11,7 +11,7 @@ const postBillSales = async (req, res, next) => {
 
         // Check inventory for each product
         for (let ud of uds) {
-            const inventoryItem = await inventoryData.findOne({ productName: ud.productName });
+            const inventoryItem = await InventoryData.findOne({ productName: ud.productName });
 
             if (!inventoryItem || inventoryItem.quantity < ud.quantity) {
                 return res.status(400).json({
@@ -27,10 +27,10 @@ const postBillSales = async (req, res, next) => {
         for (let ud of uds) {
             await new salesData(ud).save();
 
-            const inventoryItem = await inventoryData.findOne({ productName: ud.productName });
+            const inventoryItem = await InventoryData.findOne({ productName: ud.productName });
             const updatedQty = inventoryItem.quantity - ud.quantity;
 
-            await inventoryData.findOneAndUpdate(
+            await InventoryData.findOneAndUpdate(
                 { productName: ud.productName },
                 { quantity: updatedQty }
             );
@@ -60,18 +60,18 @@ const postBillPurchases = async (req, res, next) => {
             await new purchasesData(ud).save();
 
             // Update inventory
-            const inventoryItem = await inventoryData.findOne({ productName: ud.productName });
+            const inventoryItem = await InventoryData.findOne({ productName: ud.productName });
 
             if (inventoryItem) {
                 const updatedQty = inventoryItem.quantity + ud.quantity;
 
-                await inventoryData.findOneAndUpdate(
+                await InventoryData.findOneAndUpdate(
                     { productName: ud.productName },
                     { quantity: updatedQty }
                 );
             } else {
                 // New product — create inventory record
-                const newInventory = new inventoryData({
+                const newInventory = new InventoryData({
                     productName: ud.productName,
                     productId: ud.productId,
                     quantity: ud.quantity
