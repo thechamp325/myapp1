@@ -3,6 +3,7 @@ const salesData = require('../models/Sales');
 
 const purchasesData= require('../models/Purchases.js');
 const productData = require('../models/ProductData');
+const InventoryData = require('../models/InventoryData');
 
 
 const postBillSales = async (req, res, next) => {
