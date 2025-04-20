@@ -5,79 +5,87 @@ const purchasesData= require('../models/Purchases.js');
 const productData = require('../models/ProductData');
 
 
-
-const postBillSales = async (req,res,next) => {
+const postBillSales = async (req, res, next) => {
     try {
-        await req.body.data.uds.map(async ud => {
-            for (let ud of req.body.data.uds) {
-                const product = await productData.findOne({ productName: ud.productName });
-                if (!product || product.quantity < ud.quantity) {
-                    return res.status(400).json({
-                        message: `Insufficient quantity for ${ud.productName}`,
-                        product: ud.productName,
-                        available: product ? product.quantity : 0,
-                        requested: ud.quantity
-                    });
-                }
+        const uds = req.body.data.uds;
+
+        // Check inventory for each product
+        for (let ud of uds) {
+            const inventoryItem = await inventoryData.findOne({ productName: ud.productName });
+
+            if (!inventoryItem || inventoryItem.quantity < ud.quantity) {
+                return res.status(400).json({
+                    message: `Insufficient quantity for ${ud.productName}`,
+                    product: ud.productName,
+                    available: inventoryItem ? inventoryItem.quantity : 0,
+                    requested: ud.quantity
+                });
             }
-            
-            let newEntry = new salesData(ud);
-            // let data = await purchasesData.findOne();
-            newEntry = await newEntry.save();
-            // newEntry1 = await newEntry1.save(); //remove
+        }
 
-        });
+        // Record sale and update inventory
+        for (let ud of uds) {
+            await new salesData(ud).save();
+
+            const inventoryItem = await inventoryData.findOne({ productName: ud.productName });
+            const updatedQty = inventoryItem.quantity - ud.quantity;
+
+            await inventoryData.findOneAndUpdate(
+                { productName: ud.productName },
+                { quantity: updatedQty }
+            );
+
+            // Notify if item is sold out
+            if (updatedQty === 0) {
+                return res.status(200).json({
+                    message: `Product ${ud.productName} has been sold out.`,
+                    product: ud.productName
+                });
+            }
+        }
+
+        return res.status(200).json({ message: 'Sales recorded successfully.' });
+
     } catch (err) {
-        next(err);
-    }
-    try{
-        await req.body.data.uds.map(async ud => {
-        let data = await productData.findOne({productName:ud.productName});
-        if(data){
-            let data1 = await productData.findOneAndUpdate({productName:ud.productName},{quantity:data.quantity-ud.quantity});
-        }
-        else{
-            next(err);
-        }
-        });
-        res.status(200).send('OK');
-
-    }
-    catch (err) {
         next(err);
     }
 };
 
-const postBillPurchases = async (req,res,next) => {
+const postBillPurchases = async (req, res, next) => {
     try {
-        await req.body.data.uds.map(async ud => {
-            let newEntry = new purchasesData(ud);
-            newEntry = await newEntry.save();
+        const uds = req.body.data.uds;
 
-        });
+        for (let ud of uds) {
+            // Record purchase
+            await new purchasesData(ud).save();
+
+            // Update inventory
+            const inventoryItem = await inventoryData.findOne({ productName: ud.productName });
+
+            if (inventoryItem) {
+                const updatedQty = inventoryItem.quantity + ud.quantity;
+
+                await inventoryData.findOneAndUpdate(
+                    { productName: ud.productName },
+                    { quantity: updatedQty }
+                );
+            } else {
+                // New product — create inventory record
+                const newInventory = new inventoryData({
+                    productName: ud.productName,
+                    productId: ud.productId,
+                    quantity: ud.quantity
+                });
+                await newInventory.save();
+            }
+        }
+
+        return res.status(200).json({ message: 'Purchases recorded and inventory updated.' });
+
     } catch (err) {
         next(err);
     }
-    try{
-        await req.body.data.uds.map(async ud => {
-        let data = await productData.findOne({productName:ud.productName});
-        if(data){
-            let data1 = await productData.findOneAndUpdate({productName:ud.productName},{quantity:data.quantity+ud.quantity});
-        }
-        else{
-            let newEntry = new productData(ud);
-            newEntry = await newEntry.save();
-        }
-        });
-        res.status(200).send('OK');
-
-    }
-    catch (err) {
-        next(err);
-    }
 };
-
-
 
 
 const getpurchases = async (req,res,next) => {
